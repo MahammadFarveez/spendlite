@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpendLite — Personal Expense Tracker</title>
+  <meta name="description" content="A clean, modern, beginner-friendly personal expense tracker with real-time statistics, monthly analytics, and SQLite persistence.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout" id="app-layout">
+    
+    <!-- Mobile Header -->
+    <header class="mobile-header" id="mobile-header">
+      <button class="menu-toggle-btn" id="mobile-menu-toggle" aria-label="Toggle navigation menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="mobile-brand">
+        <span class="brand-logo-icon">₹</span>
+        <span class="brand-name">SpendLite</span>
+      </div>
+      <button class="btn btn-primary btn-sm" id="mobile-add-btn" aria-label="Add Expense">
+        + Add
+      </button>
+    </header>
+
+    <!-- Sidebar Overlay for mobile -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Dark Navy Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-container">
+          <div class="brand-logo">₹</div>
+          <div class="brand-text">
+            <h1 class="brand-title">SpendLite</h1>
+            <span class="brand-subtitle">Personal Tracker</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <button class="nav-link active" id="nav-dashboard-btn" data-view="dashboard">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              <span>Dashboard</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="nav-transactions-btn" data-view="transactions">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              <span>Transactions</span>
+              <span class="nav-badge" id="nav-tx-count">0</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="quick-add-container">
+          <button class="btn btn-accent btn-block" id="sidebar-add-expense-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Add Expense</span>
+          </button>
+        </div>
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span class="status-text">SQLite Connected</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="main-content">
+      
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <h2 class="page-heading" id="current-page-title">Dashboard Overview</h2>
+          <p class="page-subheading" id="current-date-display">Tracking your expenses in Indian Rupees (₹)</p>
+        </div>
+        <div class="top-bar-right">
+          <button class="btn btn-primary" id="top-bar-add-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>New Expense</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: DASHBOARD -->
+      <section class="view-section active" id="dashboard-view">
+        
+        <!-- Summary Cards Grid -->
+        <div class="stats-grid">
+          
+          <!-- Total Monthly Expense -->
+          <div class="stat-card" id="card-total-expense">
+            <div class="stat-card-header">
+              <span class="stat-label">This Month's Spending</span>
+              <div class="stat-icon-wrapper icon-green">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-total-expense">₹0.00</div>
+            <div class="stat-footer">
+              <span class="stat-subtext" id="stat-month-label">Current Month</span>
+            </div>
+          </div>
+
+          <!-- Total Transactions Count -->
+          <div class="stat-card" id="card-total-tx">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Transactions</span>
+              <div class="stat-icon-wrapper icon-navy">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-tx-count">0</div>
+            <div class="stat-footer">
+              <span class="stat-subtext" id="stat-alltime-tx-subtext">recorded in database</span>
+            </div>
+          </div>
+
+          <!-- Highest Spending Category -->
+          <div class="stat-card" id="card-highest-category">
+            <div class="stat-card-header">
+              <span class="stat-label">Top Spending Category</span>
+              <div class="stat-icon-wrapper icon-amber">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 20V10"></path>
+                  <path d="M12 20V4"></path>
+                  <path d="M6 20v-6"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-value stat-value-truncate" id="stat-highest-category">None</div>
+            <div class="stat-footer">
+              <span class="stat-subtext" id="stat-highest-amount">₹0.00 spent</span>
+            </div>
+          </div>
+
+          <!-- Average Per Transaction -->
+          <div class="stat-card" id="card-avg-expense">
+            <div class="stat-card-header">
+              <span class="stat-label">Average Per Transaction</span>
+              <div class="stat-icon-wrapper icon-blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-avg-expense">₹0.00</div>
+            <div class="stat-footer">
+              <span class="stat-subtext">calculated for this month</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dashboard Details Section: 2 Columns -->
+        <div class="dashboard-columns">
+          
+          <!-- Category Spending Breakdown (CSS Bar Visualization) -->
+          <div class="card breakdown-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Category-wise Spending</h3>
+                <p class="card-subtitle">Monthly distribution across categories</p>
+              </div>
+              <span class="badge badge-light" id="breakdown-month-tag">This Month</span>
+            </div>
+            <div class="card-body">
+              <div class="category-bars-container" id="category-bars-list">
+                <!-- Dynamically populated bars -->
+                <div class="loading-state">
+                  <div class="spinner"></div>
+                  <p>Calculating category spending...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 Most Recent Transactions -->
+          <div class="card recent-tx-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Recent Transactions</h3>
+                <p class="card-subtitle">Latest 5 recorded expenses</p>
+              </div>
+              <button class="btn btn-ghost btn-sm" id="view-all-tx-link">View All &rarr;</button>
+            </div>
+            <div class="card-body">
+              <div class="recent-list" id="recent-transactions-list">
+                <!-- Dynamically populated list -->
+                <div class="loading-state">
+                  <div class="spinner"></div>
+                  <p>Loading recent transactions...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- VIEW 2: TRANSACTIONS (MANAGE EXPENSES) -->
+      <section class="view-section" id="transactions-view">
+        
+        <div class="card transactions-card">
+          
+          <!-- Filter & Search Toolbar -->
+          <div class="toolbar">
+            <div class="toolbar-search">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input 
+                type="text" 
+                id="search-input" 
+                class="form-control" 
+                placeholder="Search by title or notes..."
+                aria-label="Search expenses"
+              >
+            </div>
+
+            <div class="toolbar-filters">
+              <!-- Category Filter -->
+              <div class="filter-group">
+                <label for="category-filter" class="filter-label">Category:</label>
+                <select id="category-filter" class="form-select">
+                  <option value="All">All Categories</option>
+                  <option value="Food">Food</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Education">Education</option>
+                  <option value="Shopping">Shopping</option>
+                  <option value="Bills">Bills</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <!-- Start Date Filter -->
+              <div class="filter-group">
+                <label for="start-date-filter" class="filter-label">From:</label>
+                <input type="date" id="start-date-filter" class="form-control form-control-sm">
+              </div>
+
+              <!-- End Date Filter -->
+              <div class="filter-group">
+                <label for="end-date-filter" class="filter-label">To:</label>
+                <input type="date" id="end-date-filter" class="form-control form-control-sm">
+              </div>
+
+              <!-- Reset Filters -->
+              <button class="btn btn-outline btn-sm" id="reset-filters-btn" title="Reset all filters">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Filter Results Bar -->
+          <div class="filter-meta-bar">
+            <span id="filtered-count-text">Showing all transactions</span>
+            <span class="filtered-total-badge" id="filtered-total-amount">Total: ₹0.00</span>
+          </div>
+
+          <!-- Expenses Table / List -->
+          <div class="table-responsive">
+            <table class="expenses-table" id="expenses-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Title & Notes</th>
+                  <th>Category</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expenses-tbody">
+                <!-- Dynamically rendered rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Loading & Empty States for Table -->
+          <div class="state-container" id="transactions-state"></div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- ADD / EDIT EXPENSE MODAL -->
+  <div class="modal-backdrop" id="expense-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Add New Expense</h3>
+        <button class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="expense-form" novalidate>
+        <!-- Hidden input for edit mode -->
+        <input type="hidden" id="expense-id-input" value="">
+
+        <div class="modal-body">
+          
+          <!-- Validation Alert Container -->
+          <div class="form-alert hidden" id="form-alert"></div>
+
+          <!-- Title Field -->
+          <div class="form-group">
+            <label for="expense-title-input" class="form-label">
+              Expense Title <span class="required-star">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="expense-title-input" 
+              class="form-control" 
+              placeholder="e.g. Weekly Groceries, Bus Pass" 
+              maxlength="100"
+              required
+            >
+            <span class="field-hint">Max 100 characters</span>
+          </div>
+
+          <!-- Amount Field -->
+          <div class="form-group">
+            <label for="expense-amount-input" class="form-label">
+              Amount (₹ INR) <span class="required-star">*</span>
+            </label>
+            <div class="input-prefix-wrapper">
+              <span class="input-prefix">₹</span>
+              <input 
+                type="number" 
+                id="expense-amount-input" 
+                class="form-control input-with-prefix" 
+                placeholder="0.00" 
+                min="0.01" 
+                step="any"
+                required
+              >
+            </div>
+            <span class="field-hint">Enter a positive amount</span>
+          </div>
+
+          <!-- Category Field -->
+          <div class="form-group">
+            <label for="expense-category-input" class="form-label">
+              Category <span class="required-star">*</span>
+            </label>
+            <select id="expense-category-input" class="form-select" required>
+              <option value="" disabled selected>Select category</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Education">Education</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Date Field -->
+          <div class="form-group">
+            <label for="expense-date-input" class="form-label">
+              Date <span class="required-star">*</span>
+            </label>
+            <input 
+              type="date" 
+              id="expense-date-input" 
+              class="form-control" 
+              required
+            >
+          </div>
+
+          <!-- Notes Field -->
+          <div class="form-group">
+            <label for="expense-notes-input" class="form-label">
+              Notes <span class="optional-tag">(Optional)</span>
+            </label>
+            <textarea 
+              id="expense-notes-input" 
+              class="form-control" 
+              rows="2" 
+              placeholder="Additional details, bill reference, etc."
+              maxlength="250"
+            ></textarea>
+            <span class="field-hint">Max 250 characters</span>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-submit-btn">
+            <span id="submit-btn-spinner" class="spinner-sm hidden"></span>
+            <span id="submit-btn-text">Save Expense</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRMATION MODAL -->
+  <div class="modal-backdrop" id="delete-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal-card modal-card-sm">
+      <div class="modal-header">
+        <h3 class="modal-title text-danger" id="delete-modal-title">Confirm Deletion</h3>
+        <button class="modal-close-btn" id="delete-modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this expense record?</p>
+        <div class="delete-item-preview" id="delete-item-preview"></div>
+        <p class="text-muted text-sm mt-2">This action cannot be undone and will update your dashboard totals.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="delete-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="delete-confirm-btn">
+          <span id="delete-btn-spinner" class="spinner-sm hidden"></span>
+          <span id="delete-btn-text">Delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
